@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+	<title>泄压戳气球</title>
+	<link rel="stylesheet" href="css/game.css" />
+	<script type="text/javascript" src="js/soya2d.all.min.js"></script>
+</head>
+<body>
+	<div class="soya-container">
+	   <!-- soya2d会在这里显示 -->
+	</div>
+
+	<!-- 升级提示 -->
+	<div id="levelUp" class="fadeInUp">
+		<img src="img/level_up.png" alt="" />
+	</div>
+
+	<audio id="boon" src="TowerSelect.mp3" style="opacity:0; width:0; height:0; overflow:hidden;"></audio>
+
+	<!-- 游戏规则 -->
+	<div id="rule" style="display:none">
+		<div class="content">
+			<p>1、点击气球把气球戳破即可，注意气球上的数字，当数字存在时需要点击多次才能戳破的哟！</p>
+			<p>2、过关之后会直接进入下一关。</p>
+			<p>3、每一关都是限时，需要在规定时间内通关才有效。</p>
+			<p>4、游戏作者：fonglezen </p>
+		</div>
+		<div class="ok" id="ruleOk"><img src="img/ok.png" alt=""></div>
+	</div>
+
+	<script type="text/javascript">
+		//判断浏览器的宽高
+		var gameW = window.innerWidth;
+		var gameH = window.innerHeight;
+		var tap = "ontouchend" in document ? 'touchend' : 'click';
+		var levelUp = document.getElementById('levelUp'),
+			boon = document.getElementById('boon');
+
+		if(gameW > 640){
+			gameW = 640;
+		}
+		
+        var game = new soya2d.Game({
+            container:'.soya-container'
+        });
+
+
+        // 点击游戏规则ok按钮
+        var rule_ok = document.getElementById('ruleOk'),
+        	rule = document.getElementById('rule');
+        rule_ok.addEventListener(tap, function(){
+        	rule.style.display = 'none';
+        });
+
+	</script>
+	
+	<script type="text/javascript" src="js/scene.js"></script>
+	<script type="text/javascript" src="js/loader.js"></script>
+	
+	<script type="text/javascript">
+		game.view.scaleMode = soya2d.SCALEMODE_NOSCALE;
+        game.start(loader);
+	</script>
+
+</body>
+</html>
