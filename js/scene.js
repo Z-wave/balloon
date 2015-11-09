@@ -29,7 +29,6 @@ var scene = new soya2d.Scene({
             fillStyle:'#fff',
             font:'normal normal 28px/normal 黑体',
             onUpdate:function(){
-                console.log(this.text)
                 this.setText(_this.nowlv.toString());
             }
         });
@@ -117,7 +116,7 @@ var scene = new soya2d.Scene({
         _this.add(pausebtn);
 
         pausebtn.on(tap,function(e){
-            console.log('pause');
+            //console.log('pause');
             //_this.add(playbtn);
             // playbtn.on(tap,function(e){
             //     console.log('play');
@@ -144,7 +143,8 @@ var scene = new soya2d.Scene({
     },
 
     createBalloon:function(lv){
-        var _this = this;
+        var _this = this,
+            loopInterval;
 
         _this.allStep = lv*2;
         
@@ -163,16 +163,27 @@ var scene = new soya2d.Scene({
             randomW = gameW*0.179,
             randomH = gameH*0.168;
 
+           
             _this.balloons[i] = new soya2d.Sprite({
                 textures:balloon_tex,
                 x:randomX,
-                y:randomY,
+                y:gameH*0.8,
                 w:randomW,
-                h:randomH
+                h:randomH,
+                rotation:0,
+                onUpdate:function(){
+                    this.y--;
+                    //console.log(this.y)
+                    if(this.y < gameH*0.168*-1){
+                        _this.remove(this);
+                    }
+                    
+
+                }
             });
-            _this.add(_this.balloons[i]);
 
             
+           
             (function(index){
                 index = i;
                  _this.balloons[index].on(tap,function(){
@@ -180,15 +191,15 @@ var scene = new soya2d.Scene({
                     //创建消失的气球粒子
                     _this.createBalloonDie(_this.balloons[index].textures,_this.balloons[index].x,_this.balloons[index].y);
 
-                    console.log('remove balloon ' + index);
+                    // console.log('remove balloon ' + index);
                     boon.pause();
                     boon.currentTime = 0.0; 
                     _this.remove(this);
                     boon.play();
 
-                    _this.allBoon+= 1;
+                    _this.allBoon+= 10;
 
-                    console.log(index+'isRendered()?='+_this.balloons[index].isRendered());
+                    // console.log(index+'isRendered()?='+_this.balloons[index].isRendered());
                     _this.balloons[index].updateTransform();
                     _this.balloons[index].w = 0;
                     _this.balloons[index].h = 0;
@@ -196,6 +207,7 @@ var scene = new soya2d.Scene({
                     if(_this.allStep == 0){
                         levelUp.style.display = 'block';
 
+                        loopInterval = clearInterval(loopInterval);
                         // 等级上升1
                         _this.nowlv+=1;
                         _this.createBalloon(_this.nowlv);
@@ -212,6 +224,17 @@ var scene = new soya2d.Scene({
             })();
            
         }
+
+        var loop = _this.allStep;
+
+        loopInterval = setInterval(function(){
+           
+            if(loop > 0){
+                loop = loop - 1;
+                _this.add(_this.balloons[loop]);
+                
+            }
+        }, 500);
 
 
     },
