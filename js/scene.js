@@ -6,6 +6,9 @@ var scene = new soya2d.Scene({
     allStep:0,
     nowlv:1,
     allBoon:0,
+    gamepause:0,
+    loopInterval:null,
+    leaveStep:0,
     onInit:function(game){
          var _this = this;
 
@@ -63,26 +66,26 @@ var scene = new soya2d.Scene({
         _this.add(balloon_count); 
 
         // Time area
-        var time_tex = game.textureManager.find('time');
-        var timebg = new soya2d.Sprite({
-            textures:time_tex,
-            w:gameW,
-            h:gameH,
-            x:0,
-            y:0
-        });
-        _this.add(timebg);
+        // var time_tex = game.textureManager.find('time');
+        // var timebg = new soya2d.Sprite({
+        //     textures:time_tex,
+        //     w:gameW,
+        //     h:gameH,
+        //     x:0,
+        //     y:0
+        // });
+        // _this.add(timebg);
 
-        var time_txt = '00:00:10';
-        var time = new soya2d.Text({
-            text:time_txt,
-            x:gameW/2,
-            y:gameH*0.036,
-            fillStyle:'#fff',
-            w:100,
-            font:'normal normal 15px/normal 黑体'
-        });
-        timebg.add(time);
+        // var time_txt = '00:00:10';
+        // var time = new soya2d.Text({
+        //     text:time_txt,
+        //     x:gameW/2,
+        //     y:gameH*0.036,
+        //     fillStyle:'#fff',
+        //     w:100,
+        //     font:'normal normal 15px/normal 黑体'
+        // });
+        // timebg.add(time);
 
 
         // rulebutton
@@ -98,6 +101,8 @@ var scene = new soya2d.Scene({
         });
         _this.add(rulebtn);
         rulebtn.on(tap,function(){
+            _this.pauseGame();
+            
             rule.style.display = 'block';
         });
         
@@ -116,25 +121,10 @@ var scene = new soya2d.Scene({
         _this.add(pausebtn);
 
         pausebtn.on(tap,function(e){
-            //console.log('pause');
-            //_this.add(playbtn);
-            // playbtn.on(tap,function(e){
-            //     console.log('play');
-            //     _this.remove(playbtn);
-            //    // playbtn.off(tap);
-            // });
+            _this.pauseGame();
+            playbtn.style.display = 'block';
         });
         
-        // play
-        var play = game.textureManager.find('play');
-
-        var playbtn = new soya2d.Sprite({
-            textures:play,
-            w:gameW,
-            h:gameH,
-            x:0,
-            y:0
-        });
 
 
         /* 气球生成 */
@@ -143,10 +133,10 @@ var scene = new soya2d.Scene({
     },
 
     createBalloon:function(lv){
-        var _this = this,
-            loopInterval;
+        var _this = this;
 
         _this.allStep = lv*2;
+
         
         var edgeLeft = 0,
             edgeRight = gameW - gameW*0.179,
@@ -162,20 +152,32 @@ var scene = new soya2d.Scene({
             randomY = Math.round(Math.random()*(edgeBottom -edgeTop)) + edgeTop,
             randomW = gameW*0.179,
             randomH = gameH*0.168;
+            var rotationGap = 0.25;
+            var randomRo = Math.round(Math.random()*120-60);
 
-           
+
             _this.balloons[i] = new soya2d.Sprite({
                 textures:balloon_tex,
                 x:randomX,
                 y:gameH*0.8,
                 w:randomW,
                 h:randomH,
-                rotation:0,
+                rotation:randomRo,
                 onUpdate:function(){
-                    this.y--;
-                    //console.log(this.y)
-                    if(this.y < gameH*0.168*-1){
-                        _this.remove(this);
+                    if(_this.gamepause == 0){
+                        this.y = this.y - gapUp;
+
+                        if(this.y < gameH*0.168*-1){
+                            _this.remove(this);
+                        }
+
+                        this.rotation += rotationGap;
+                        if(this.rotation == -65){
+                            rotationGap = 0.25;
+                        }
+                        if(this.rotation == 60){
+                            rotationGap = -0.25;
+                        }
                     }
                     
 
@@ -197,7 +199,7 @@ var scene = new soya2d.Scene({
                     _this.remove(this);
                     boon.play();
 
-                    _this.allBoon+= 10;
+                    _this.allBoon+= 1;
 
                     // console.log(index+'isRendered()?='+_this.balloons[index].isRendered());
                     _this.balloons[index].updateTransform();
@@ -207,7 +209,8 @@ var scene = new soya2d.Scene({
                     if(_this.allStep == 0){
                         levelUp.style.display = 'block';
 
-                        loopInterval = clearInterval(loopInterval);
+                        _this.loopInterval = clearInterval(_this.loopInterval);
+
                         // 等级上升1
                         _this.nowlv+=1;
                         _this.createBalloon(_this.nowlv);
@@ -225,18 +228,39 @@ var scene = new soya2d.Scene({
            
         }
 
-        var loop = _this.allStep;
+        
+        _this.leaveStep = _this.allStep;
+        // console.log(_this.leaveStep);
+        _this.playGame();
+        
 
-        loopInterval = setInterval(function(){
+
+    },
+
+    /* 暂停游戏*/
+    pauseGame:function(){
+        var _this = this;
+        _this.gamepause = 1;
+        _this.loopInterval = clearInterval(_this.loopInterval);
+    },
+
+    /* 继续游戏 */
+    playGame:function(){
+       
+        var _this = this;
+         _this.gamepause = 0;
+
+        console.log('剩下：' + _this.leaveStep);
+
+         _this.loopInterval = setInterval(function(){
            
-            if(loop > 0){
-                loop = loop - 1;
-                _this.add(_this.balloons[loop]);
+            if(_this.leaveStep > 0){
+                _this.leaveStep = _this.leaveStep - 1;
+                _this.add(_this.balloons[_this.leaveStep]);
                 
             }
+
         }, 500);
-
-
     },
 
     createBalloonDie:function(tex,x,y){

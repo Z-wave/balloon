@@ -30,13 +30,18 @@
 		<div class="ok" id="ruleOk"><img src="img/ok.png" alt=""></div>
 	</div>
 
+	<!-- 游戏开始按钮 -->
+	<div id="playbtn"></div>
+
 	<script type="text/javascript">
 		//判断浏览器的宽高
 		var gameW = window.innerWidth;
 		var gameH = window.innerHeight;
 		var tap = "ontouchend" in document ? 'touchend' : 'click';
 		var levelUp = document.getElementById('levelUp'),
-			boon = document.getElementById('boon');
+			boon = document.getElementById('boon'),
+			playbtn = document.getElementById('playbtn');
+		var gapUp = gameH*0.004;
 
 		if(gameW > 640){
 			gameW = 640;
@@ -52,7 +57,14 @@
         	rule = document.getElementById('rule');
         rule_ok.addEventListener(tap, function(){
         	rule.style.display = 'none';
+        	scene.playGame();
         });
+
+        // 点击开始游戏按钮
+        playbtn.addEventListener(tap, function(){
+        	playbtn.style.display = 'none';
+        	scene.playGame();
+        })
 
 	</script>
 	
