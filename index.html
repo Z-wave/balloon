@@ -33,6 +33,9 @@
 	<!-- 游戏开始按钮 -->
 	<div id="playbtn"></div>
 
+	<!-- 游戏重来按钮 -->
+	<div id="replaybtn"></div>
+
 	<script type="text/javascript">
 		//判断浏览器的宽高
 		var gameW = window.innerWidth;
@@ -40,7 +43,9 @@
 		var tap = "ontouchend" in document ? 'touchend' : 'click';
 		var levelUp = document.getElementById('levelUp'),
 			boon = document.getElementById('boon'),
-			playbtn = document.getElementById('playbtn');
+			playbtn = document.getElementById('playbtn'),
+			replaybtn = document.getElementById('replaybtn');
+
 		var gapUp = gameH*0.004;
 
 		if(gameW > 640){
@@ -64,7 +69,14 @@
         playbtn.addEventListener(tap, function(){
         	playbtn.style.display = 'none';
         	scene.playGame();
-        })
+        });
+
+
+        // 点击重新开始按钮
+        replaybtn.addEventListener(tap, function(){
+        	replaybtn.style.display = 'none';
+        	scene.createBalloon(scene.nowlv);
+        });
 
 	</script>
 	

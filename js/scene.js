@@ -3,12 +3,13 @@
 var scene = new soya2d.Scene({
     
     balloons:[],
-    allStep:0,
+    allStep:0,  //计算所需要点的气球总数，点击气球会-1，如果为0，则表示可以升级了
     nowlv:1,
     allBoon:0,
     gamepause:0,
-    loopInterval:null,
-    leaveStep:0,
+    loopInterval:null,  //添加气球的定时器
+    leaveStep:0,        //还剩下多少个气球没有添加
+    failballoon:0,      // 在飘出去之前没有戳破的地球个数
     onInit:function(game){
          var _this = this;
 
@@ -136,7 +137,10 @@ var scene = new soya2d.Scene({
         var _this = this;
 
         _this.allStep = lv*2;
+        console.log('=================');
+        console.log('【新关卡】第' + lv + '关总步数：' + _this.allStep);
 
+        _this.failballoon = 0;
         
         var edgeLeft = 0,
             edgeRight = gameW - gameW*0.179,
@@ -169,6 +173,12 @@ var scene = new soya2d.Scene({
 
                         if(this.y < gameH*0.168*-1){
                             _this.remove(this);
+                            _this.allStep = _this.allStep - 1
+                            _this.failballoon++;
+                            console.log('●▽● 已经有'+_this.failballoon + '个气球飞出去了 ●▽●');
+                            if(_this.allStep == 0){
+                                _this.isOver();
+                            }
                         }
 
                         this.rotation += rotationGap;
@@ -206,22 +216,9 @@ var scene = new soya2d.Scene({
                     _this.balloons[index].w = 0;
                     _this.balloons[index].h = 0;
                     _this.allStep = _this.allStep - 1;
+                    console.log('【点击】待消灭的气球：'+_this.allStep)
                     if(_this.allStep == 0){
-                        levelUp.style.display = 'block';
-
-                        _this.loopInterval = clearInterval(_this.loopInterval);
-
-                        // 等级上升1
-                        _this.nowlv+=1;
-                        _this.createBalloon(_this.nowlv);
-
-                        setTimeout(function(){
-                            levelUp.className = 'fadeOutUp';
-                        }, 800);
-                        setTimeout(function(){
-                            levelUp.style.display = 'none';
-                            levelUp.className = 'fadeInUp';
-                        }, 1300);
+                        _this.isOver();
                     }
                 });
             })();
@@ -237,11 +234,53 @@ var scene = new soya2d.Scene({
 
     },
 
+    //判断是否闯关失败了
+    isOver:function(){
+        var _this = this;
+        var fail = 0;
+
+        if(_this.nowlv < 10 && _this.failballoon > 0){
+            //小于10关的，如果超过0个飘出去就失败
+            fail = 1;
+        }else if(_this.failballoon > 5){
+            //大于10关的，如果超过5个飘出去了则失败
+            fail = 1;
+        }
+        
+
+        if(fail){
+            
+            alert('你失败了');
+            _this.pauseGame();
+            replaybtn.style.display = 'block';
+
+        }else{
+            levelUp.style.display = 'block';
+
+            _this.loopInterval = clearInterval(_this.loopInterval);
+
+            // 等级上升1
+            _this.nowlv+=1;
+            _this.createBalloon(_this.nowlv);
+
+            setTimeout(function(){
+                levelUp.className = 'fadeOutUp';
+            }, 800);
+            setTimeout(function(){
+                levelUp.style.display = 'none';
+                levelUp.className = 'fadeInUp';
+            }, 1300);
+        }
+
+        
+    },
+
     /* 暂停游戏*/
     pauseGame:function(){
         var _this = this;
         _this.gamepause = 1;
         _this.loopInterval = clearInterval(_this.loopInterval);
+        console.log('【暂停】已经生成的气球：'+_this.allStep)
     },
 
     /* 继续游戏 */
@@ -250,7 +289,8 @@ var scene = new soya2d.Scene({
         var _this = this;
          _this.gamepause = 0;
 
-        console.log('剩下：' + _this.leaveStep);
+        console.log('【继续】剩下没有生成的气球个数：' + _this.leaveStep);
+
 
          _this.loopInterval = setInterval(function(){
            
