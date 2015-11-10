@@ -29,7 +29,7 @@ var scene = new soya2d.Scene({
             text:_this.nowlv.toString(),
             x:gameW*0.17,
             y:gameH*0.025,
-            w:20,
+            w:120,
             fillStyle:'#fff',
             font:'normal normal 28px/normal 黑体',
             onUpdate:function(){
@@ -129,12 +129,20 @@ var scene = new soya2d.Scene({
 
 
         /* 气球生成 */
+        if(localStorage.lv){
+            _this.nowlv = parseInt(localStorage.lv);
+        }
+
         _this.createBalloon(_this.nowlv);
         
     },
 
     createBalloon:function(lv){
-        var _this = this;
+        var _this = this;   
+
+        // 保存关卡
+        console.log(lv);
+        localStorage.lv = lv;
 
         _this.allStep = lv*2;
         console.log('=================');
@@ -201,7 +209,7 @@ var scene = new soya2d.Scene({
                  _this.balloons[index].on(tap,function(){
 
                     //创建消失的气球粒子
-                    _this.createBalloonDie(_this.balloons[index].textures,_this.balloons[index].x,_this.balloons[index].y);
+                    //_this.createBalloonDie(_this.balloons[index].textures,_this.balloons[index].x,_this.balloons[index].y);
 
                     // console.log('remove balloon ' + index);
                     boon.pause();
@@ -249,8 +257,8 @@ var scene = new soya2d.Scene({
         
 
         if(fail){
-            
-            alert('你失败了');
+
+            //alert('你失败了');
             _this.pauseGame();
             replaybtn.style.display = 'block';
 
