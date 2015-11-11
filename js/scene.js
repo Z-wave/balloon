@@ -139,9 +139,8 @@ var scene = new soya2d.Scene({
 
     createBalloon:function(lv){
         var _this = this;   
-
+        _this.balloons = [];
         // 保存关卡
-        console.log(lv);
         localStorage.lv = lv;
 
         _this.allStep = lv*2;
@@ -168,59 +167,61 @@ var scene = new soya2d.Scene({
             var randomRo = Math.round(Math.random()*120-60);
 
 
-            _this.balloons[i] = new soya2d.Sprite({
-                textures:balloon_tex,
-                x:randomX,
-                y:gameH*0.8,
-                w:randomW,
-                h:randomH,
-                rotation:randomRo,
-                onUpdate:function(){
-                    if(_this.gamepause == 0){
-                        this.y = this.y - gapUp;
-
-                        if(this.y < gameH*0.168*-1){
-                            _this.remove(this);
-                            _this.allStep = _this.allStep - 1
-                            _this.failballoon++;
-                            console.log('●▽● 已经有'+_this.failballoon + '个气球飞出去了 ●▽●');
-                            if(_this.allStep == 0){
-                                _this.isOver();
-                            }
-                        }
-
-                        this.rotation += rotationGap;
-                        if(this.rotation == -65){
-                            rotationGap = 0.25;
-                        }
-                        if(this.rotation == 60){
-                            rotationGap = -0.25;
-                        }
-                    }
-                    
-
-                }
-            });
-
-            
            
             (function(index){
                 index = i;
+
+                _this.balloons[index] = new soya2d.Sprite({
+                    textures:balloon_tex,
+                    x:randomX,
+                    y:gameH*0.8,
+                    w:randomW,
+                    h:randomH,
+                    rotation:randomRo,
+                    onUpdate:function(){
+                        if(_this.gamepause == 0){
+                            this.y = this.y - gapUp;
+
+                            if(this.y < gameH*0.168*-1){
+                                _this.remove(this);
+                                _this.remove(this);
+                                _this.allStep = _this.allStep - 1
+                                _this.failballoon++;
+                                console.log('●▽● 已经有'+_this.failballoon + '个气球飞出去了 ●▽●');
+
+                                if(_this.allStep == 0){
+                                    _this.isOver();
+                                }else if((_this.nowlv < 10 && _this.failballoon > 2) || (_this.failballoon > 5 && _this.nowlv < 10)){
+                                   _this.isOver();
+                                   console.log('超出了可以飘出去的气球个数');
+
+                                  
+                                }
+                            }
+
+                            this.rotation += rotationGap;
+                            if(this.rotation == -65){
+                                rotationGap = 0.25;
+                            }
+                            if(this.rotation == 60){
+                                rotationGap = -0.25;
+                            }
+                        }
+                        
+
+                    }
+                });
                  _this.balloons[index].on(tap,function(){
 
                     //创建消失的气球粒子
                     //_this.createBalloonDie(_this.balloons[index].textures,_this.balloons[index].x,_this.balloons[index].y);
 
-                    // console.log('remove balloon ' + index);
                     boon.pause();
                     boon.currentTime = 0.0; 
                     _this.remove(this);
                     boon.play();
 
                     _this.allBoon+= 1;
-
-                    // console.log(index+'isRendered()?='+_this.balloons[index].isRendered());
-                    _this.balloons[index].updateTransform();
                     _this.balloons[index].w = 0;
                     _this.balloons[index].h = 0;
                     _this.allStep = _this.allStep - 1;
@@ -245,10 +246,15 @@ var scene = new soya2d.Scene({
     //判断是否闯关失败了
     isOver:function(){
         var _this = this;
+
+        _this.loopInterval = clearInterval(_this.loopInterval);
+
+        _this.gamepause = 1;
+
         var fail = 0;
 
-        if(_this.nowlv < 10 && _this.failballoon > 0){
-            //小于10关的，如果超过0个飘出去就失败
+        if(_this.nowlv < 10 && _this.failballoon > 2){
+            //小于10关的，如果超过2个飘出去就失败
             fail = 1;
         }else if(_this.failballoon > 5){
             //大于10关的，如果超过5个飘出去了则失败
@@ -257,15 +263,33 @@ var scene = new soya2d.Scene({
         
 
         if(fail){
-
+           
             //alert('你失败了');
             _this.pauseGame();
             replaybtn.style.display = 'block';
 
+            console.log('***************');
+            console.log('已经飘出去的气球 = '+_this.failballoon);
+            console.log('已经生成的气球 = '+_this.balloons.length);
+            console.log('还在屏幕上的气球 = '+(_this.balloons.length - _this.failballoon));
+            console.log('***************');
+
+            var ben = _this.balloons.length - _this.failballoon;
+            for(var f = ben; f >=0; f--){
+                //console.log(_this.balloons[f]);
+                _this.balloons[f].remove();
+                _this.balloons[f].w = 0;
+                _this.balloons[f].h = 0;
+                _this.balloons[f].y = gameH*0.168*-1;
+            }
+
+         
+           
+           
         }else{
             levelUp.style.display = 'block';
 
-            _this.loopInterval = clearInterval(_this.loopInterval);
+            //_this.loopInterval = clearInterval(_this.loopInterval);
 
             // 等级上升1
             _this.nowlv+=1;
