@@ -1,7 +1,6 @@
 
 
 var scene = new soya2d.Scene({
-    
     balloons:[],
     allStep:0,  //计算所需要点的气球总数，点击气球会-1，如果为0，则表示可以升级了
     nowlv:1,
